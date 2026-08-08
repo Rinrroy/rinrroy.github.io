@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>澪洛依 | Rinrroy - 个人博客</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #18181B;
+  --on-primary: #FFFFFF;
+  --secondary: #3F3F46;
+  --accent: #2563EB;
+  --bg: #FAFAFA;
+  --fg: #09090B;
+  --muted: #E8ECF0;
+  --border: #E4E4E7;
+  --card: #FFFFFF;
+  --card-fg: #09090B;
+  --radius: 12px;
+  --font-heading: 'Archivo', sans-serif;
+  --font-body: 'Space Grotesk', sans-serif;
+}
+[data-theme="dark"] {
+  --primary: #FAFAFA;
+  --on-primary: #18181B;
+  --secondary: #A1A1AA;
+  --accent: #60A5FA;
+  --bg: #09090B;
+  --fg: #FAFAFA;
+  --muted: #27272A;
+  --border: #3F3F46;
+  --card: #18181B;
+  --card-fg: #FAFAFA;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+  overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+a { color: var(--accent); text-decoration: none; transition: opacity 0.2s; }
+a:hover { opacity: 0.8; }
+
+/* Theme toggle */
+.theme-toggle {
+  position: fixed; top: 24px; right: 24px; z-index: 100;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 50%; width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--fg); font-size: 20px;
+  transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.theme-toggle:hover { transform: scale(1.05); }
+
+/* Nav */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  padding: 20px 48px; display: flex; justify-content: center;
+  background: linear-gradient(180deg, var(--bg) 60%, transparent);
+  transition: background 0.3s;
+}
+nav a {
+  font-family: var(--font-heading);
+  font-size: 14px; font-weight: 500; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--secondary);
+  margin: 0 20px; transition: color 0.2s;
+}
+nav a:hover { color: var(--accent); }
+
+/* Hero */
+.hero {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 120px 24px 80px;
+  position: relative;
+}
+.hero-avatar {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: var(--muted); border: 3px solid var(--border);
+  overflow: hidden; margin-bottom: 32px;
+  animation: float 6s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.hero-avatar img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.hero h1 {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 700; letter-spacing: -0.03em;
+  line-height: 1.1; margin-bottom: 16px;
+}
+.hero h1 span { color: var(--accent); }
+.hero p {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: var(--secondary); max-width: 560px;
+  margin-bottom: 40px;
+}
+.hero-badges { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.hero-badges a {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: var(--radius);
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--fg); font-size: 14px; font-weight: 500;
+  transition: all 0.2s;
+}
+.hero-badges a:hover {
+  border-color: var(--accent); transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37,99,235,0.15);
+}
+.scroll-hint {
+  position: absolute; bottom: 40px;
+  color: var(--secondary); font-size: 12px;
+  letter-spacing: 0.1em; animation: bounce 2s infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+/* Section */
+.section {
+  max-width: 960px; margin: 0 auto;
+  padding: 100px 24px;
+}
+.section-label {
+  font-family: var(--font-heading);
+  font-size: 12px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 600; letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+.section-desc { color: var(--secondary); font-size: 1.05rem; max-width: 600px; margin-bottom: 48px; }
+
+/* About */
+.about-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+.about-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 32px;
+  transition: all 0.3s;
+}
+.about-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+}
+.about-card h3 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem; font-weight: 600; margin-bottom: 12px;
+}
+.about-card p { color: var(--secondary); font-size: 0.95rem; line-height: 1.7; }
+.about-card .icon { font-size: 24px; margin-bottom: 16px; display: block; }
+
+/* Projects */
+.projects-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+.project-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px;
+  transition: all 0.3s; cursor: default;
+}
+.project-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+  border-color: var(--accent);
+}
+.project-card .lang {
+  display: inline-block; padding: 2px 10px;
+  border-radius: 20px; background: var(--muted);
+  font-size: 11px; font-weight: 600; color: var(--secondary);
+  margin-bottom: 16px;
+}
+.project-card h3 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;
+}
+.project-card p { color: var(--secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px; }
+.project-card .footer {
+  display: flex; justify-content: space-between;
+  align-items: center; font-size: 13px; color: var(--secondary);
+}
+.project-card .stars { color: var(--accent); font-weight: 600; }
+
+/* Timeline */
+.timeline { position: relative; padding-left: 32px; }
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
+  width: 2px; background: var(--border);
+}
+.timeline-item {
+  position: relative; padding-bottom: 36px;
+}
+.timeline-item::before {
+  content: ''; position: absolute; left: -25px; top: 6px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--accent); border: 2px solid var(--bg);
+}
+.timeline-item .date {
+  font-size: 12px; font-weight: 600; color: var(--accent);
+  letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px;
+}
+.timeline-item h4 {
+  font-family: var(--font-heading);
+  font-size: 1rem; font-weight: 600; margin-bottom: 4px;
+}
+.timeline-item p { color: var(--secondary); font-size: 0.9rem; }
+
+/* Posts */
+.posts-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.post-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px;
+  transition: all 0.3s;
+}
+.post-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+}
+.post-card .category {
+  display: inline-block; padding: 2px 10px;
+  border-radius: 20px; background: var(--muted);
+  font-size: 11px; font-weight: 600; color: var(--secondary);
+  margin-bottom: 12px;
+}
+.post-card h3 {
+  font-family: var(--font-heading);
+  font-size: 1.05rem; font-weight: 600; margin-bottom: 8px;
+}
+.post-card p { color: var(--secondary); font-size: 0.9rem; line-height: 1.6; }
+.post-card .date {
+  font-size: 12px; color: var(--secondary); margin-top: 12px;
+}
+
+/* Contact */
+.contact-grid {
+  display: flex; gap: 16px; flex-wrap: wrap;
+}
+.contact-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 28px; border-radius: var(--radius);
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--fg); font-size: 15px; font-weight: 500;
+  transition: all 0.2s;
+}
+.contact-btn:hover {
+  border-color: var(--accent); transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37,99,235,0.12);
+}
+.contact-btn.primary {
+  background: var(--accent); border-color: var(--accent);
+  color: white;
+}
+
+/* Footer */
+footer {
+  text-align: center; padding: 48px 24px;
+  color: var(--secondary); font-size: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* Animations */
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  nav { padding: 16px 20px; gap: 12px; flex-wrap: wrap; }
+  nav a { margin: 0 10px; font-size: 12px; }
+  .about-grid, .posts-grid { grid-template-columns: 1fr; }
+  .hero { padding: 100px 20px 60px; }
+  .section { padding: 60px 20px; }
+  .theme-toggle { top: 16px; right: 16px; width: 40px; height: 40px; }
+}
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="切换主题">🌓</button>
+
+<nav>
+  <a href="#about">关于</a>
+  <a href="#projects">项目</a>
+  <a href="#timeline">历程</a>
+  <a href="#posts">文章</a>
+  <a href="#contact">联系</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-avatar">
+    <img src="images/avatar.jpg" alt="澪洛依头像">
+  </div>
+  <h1>澪洛依 <span>Rinrroy</span></h1>
+  <p>Android 内核开发者 · 开源爱好者 · 内容创作者<br>热爱折腾，喵！</p>
+  <div class="hero-badges">
+    <a href="https://github.com/Rinrroy" target="_blank">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      GitHub
+    </a>
+    <a href="https://space.bilibili.com/470832402" target="_blank">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><circle cx="8" cy="13" r="1.5"/><circle cx="16" cy="13" r="1.5"/><path d="M12 6V2"/><path d="M8 2l4 4 4-4"/></svg>
+      Bilibili
+    </a>
+    <a href="https://www.coolapk.com/u/9960587" target="_blank">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="3"/></svg>
+      酷安
+    </a>
+  </div>
+  <div class="scroll-hint">SCROLL ↓</div>
+</section>
+
+<section class="section" id="about">
+  <div class="reveal">
+    <div class="section-label">About</div>
+    <h2 class="section-title">关于我</h2>
+    <p class="section-desc">一个热爱开源、折腾 Android 内核与系统的开发者，也在 Bilibili 分享数码与编程相关内容。</p>
+  </div>
+  <div class="about-grid">
+    <div class="about-card reveal">
+      <span class="icon">💻</span>
+      <h3>Android 开发</h3>
+      <p>专注 OnePlus SM8250 平台内核开发、KernelSU 集成编译、Magisk 模块制作。擅长 Android 系统底层调优与自定义 ROM 构建。</p>
+    </div>
+    <div class="about-card reveal">
+      <span class="icon">🔧</span>
+      <h3>开源贡献</h3>
+      <p>维护多个 GitHub 开源项目，包括内核编译 Action、系统补丁模块等。持续为 Android 开源生态贡献代码与工具。</p>
+    </div>
+    <div class="about-card reveal">
+      <span class="icon">🎥</span>
+      <h3>内容创作</h3>
+      <p>在 Bilibili 分享数码产品体验、Android 开发教程、系统优化技巧。用视频记录折腾路上的点点滴滴。</p>
+    </div>
+    <div class="about-card reveal">
+      <span class="icon">📍</span>
+      <h3>关于本站</h3>
+      <p>山东德州 · Android 玩家 · 开源爱好者。这里记录我的项目、思考和创作。喵！</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="projects">
+  <div class="reveal">
+    <div class="section-label">Projects</div>
+    <h2 class="section-title">开源项目</h2>
+    <p class="section-desc">我在 GitHub 上维护的开源项目，主要集中在 Android 内核与系统工具领域。</p>
+  </div>
+  <div class="projects-grid">
+    <div class="project-card reveal" onclick="window.open('https://github.com/Rinrroy/kernel_oneplus_sm8250')">
+      <span class="lang">C</span>
+      <h3>kernel_oneplus_sm8250</h3>
+      <p>基于 CLO 的 OnePlus SM8250 设备内核。深度优化，支持 KernelSU，为 OnePlus 8/9 系列提供更好的内核体验。</p>
+      <div class="footer">
+        <span>⭐ 核心项目</span>
+        <span>2023 · 持续维护</span>
+      </div>
+    </div>
+    <div class="project-card reveal" onclick="window.open('https://github.com/Rinrroy/KernelSU_Action')">
+      <span class="lang">Shell</span>
+      <h3>KernelSU_Action</h3>
+      <p>使用 GitHub Action 自动编译集成 KernelSU 的内核。一键自动化构建流程，简化内核编译操作。</p>
+      <div class="footer">
+        <span>🤖 自动化构建</span>
+        <span>2024</span>
+      </div>
+    </div>
+    <div class="project-card reveal" onclick="window.open('https://github.com/Rinrroy/Action_OnePlus_MKSU_SUSFS')">
+      <span class="lang">GitHub Action</span>
+      <h3>Action_OnePlus_MKSU_SUSFS</h3>
+      <p>自动编译一加 SukiSU 内核的 GitHub Action 工作流。简化一加设备的安全内核编译流程。</p>
+      <div class="footer">
+        <span>⚡ 一键编译</span>
+        <span>2025</span>
+      </div>
+    </div>
+    <div class="project-card reveal" onclick="window.open('https://github.com/Rinrroy/xiaomi_pad_system_patch_additional_module')">
+      <span class="lang">Module</span>
+      <h3>小米平板系统补丁模块</h3>
+      <p>为小米平板设备提供系统级优化与功能增强的 Magisk 模块，提升平板使用体验。</p>
+      <div class="footer">
+        <span>📱 平板优化</span>
+        <span>2026</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="timeline">
+  <div class="reveal">
+    <div class="section-label">Timeline</div>
+    <h2 class="section-title">折腾历程</h2>
+    <p class="section-desc">从入门到现在的开源与开发足迹。</p>
+  </div>
+  <div class="timeline">
+    <div class="timeline-item reveal">
+      <div class="date">2021</div>
+      <h4>GitHub 之旅开始</h4>
+      <p>注册 GitHub 账号，开始接触开源世界。从学习 Android 开发起步，逐渐深入系统底层。</p>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="date">2023</div>
+      <h4>OnePlus 内核开发</h4>
+      <p>开始维护 kernel_oneplus_sm8250，深入 OnePlus SM8250 平台内核开发，研究 Linux Kernel 编译与优化。</p>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="date">2024</div>
+      <h4>KernelSU 自动化</h4>
+      <p>创建 KernelSU_Action 项目，实现 GitHub Action 自动编译集成 KernelSU 的内核，大幅降低编译门槛。</p>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="date">2025</div>
+      <h4>一加 SukiSU 集成</h4>
+      <p>继续优化一加设备的 KernelSU 体验，创建 Action_OnePlus_MKSU_SUSFS，完善自动化编译方案。</p>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="date">2026</div>
+      <h4>小米平板 & 个人网站</h4>
+      <p>扩展至小米平板系统优化，同时创建个人博客与 GitHub Pages，分享更多技术内容。</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="posts">
+  <div class="reveal">
+    <div class="section-label">Blog</div>
+    <h2 class="section-title">最新文章</h2>
+    <p class="section-desc">关于 Android 开发、内核编译、系统优化的个人笔记与分享。</p>
+  </div>
+  <div class="posts-grid">
+    <div class="post-card reveal">
+      <span class="category">Android</span>
+      <h3>OnePlus SM8250 内核编译指南</h3>
+      <p>详细记录 OnePlus 8/9 系列内核编译步骤，包括环境搭建、内核配置、KernelSU 集成等完整流程。</p>
+      <div class="date">2024 · 技术教程</div>
+    </div>
+    <div class="post-card reveal">
+      <span class="category">工具</span>
+      <h3>GitHub Action 自动编译内核</h3>
+      <p>使用 GitHub Action 实现自动化内核编译，结合 KernelSU 与 SUSFS，让编译变得简单高效。</p>
+      <div class="date">2025 · 效率工具</div>
+    </div>
+    <div class="post-card reveal">
+      <span class="category">Android</span>
+      <h3>Magisk 模块制作入门</h3>
+      <p>从零开始制作 Magisk 模块，包括模块结构、脚本编写、系统分区修改等基础教程。</p>
+      <div class="date">2025 · 技术教程</div>
+    </div>
+    <div class="post-card reveal">
+      <span class="category">数码</span>
+      <h3>我的 Android 折腾装备</h3>
+      <p>分享一下日常使用的开发设备、刷机工具以及推荐给入门玩家的实用软件与资源。</p>
+      <div class="date">2026 · 数码分享</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="contact">
+  <div class="reveal">
+    <div class="section-label">Contact</div>
+    <h2 class="section-title">联系我</h2>
+    <p class="section-desc">欢迎通过以下渠道与我交流，一起探讨 Android 开发与开源技术。</p>
+  </div>
+  <div class="contact-grid reveal">
+    <a href="https://github.com/Rinrroy" target="_blank" class="contact-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      GitHub
+    </a>
+    <a href="https://space.bilibili.com/470832402" target="_blank" class="contact-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><circle cx="8" cy="13" r="1.5"/><circle cx="16" cy="13" r="1.5"/><path d="M12 6V2"/><path d="M8 2l4 4 4-4"/></svg>
+      Bilibili
+    </a>
+    <a href="https://www.coolapk.com/u/9960587" target="_blank" class="contact-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="3"/></svg>
+      酷安
+    </a>
+    <a href="https://rinrroy.github.io" target="_blank" class="contact-btn primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      GitHub Pages
+    </a>
+  </div>
+</section>
+
+<footer>
+  <p>© 2021-2026 澪洛依 Rinrroy · Built with ❤️ · 喵！</p>
+</footer>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
