@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang=\"zh-CN\">
+<head>
+<meta charset=\"UTF-8\">
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+<title>Rinrroy :: Terminal</title>
+<link href=\"https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap\" rel=\"stylesheet\">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #050505;
+  --fg: #33FF00;
+  --fg-dim: #1A6B1A;
+  --fg-muted: #0D2B0D;
+  --fg-amber: #FFB000;
+  --fg-error: #FF3333;
+  --fg-cyan: #00D4FF;
+  --border: #33FF00;
+  --radius: 0px;
+  --font-mono: 'JetBrains Mono', 'Noto Sans SC', monospace;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-mono);
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.6;
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+::selection { background: var(--fg); color: var(--bg); }
+
+a { color: var(--fg-cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Scanline overlay */
+body::after {
+  content: '';
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(51, 255, 0, 0.03) 2px,
+    rgba(51, 255, 0, 0.03) 4px
+  );
+}
+
+/* Scanline hover toggle for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  body::after { display: none; }
+}
+
+/* Container */
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Status bar */
+.status-bar {
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--fg-dim);
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--fg-dim);
+  flex-wrap: wrap; gap: 8px;
+}
+.status-bar .right { color: var(--fg-amber); }
+
+/* ASCII Header */
+.ascii-header {
+  padding: 48px 24px 24px;
+  text-align: center;
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--fg-dim);
+  white-space: pre;
+  overflow-x: auto;
+}
+@media (max-width: 600px) {
+  .ascii-header { font-size: 6px; padding: 24px 8px 12px; }
+}
+
+/* Nav */
+.nav-bar {
+  display: flex; justify-content: center;
+  gap: 0; border-bottom: 1px solid var(--fg-dim);
+}
+.nav-bar a {
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 12px; color: var(--fg-dim);
+  border-right: 1px solid var(--fg-dim);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  transition: all 0.2s;
+}
+.nav-bar a:last-child { border-right: none; }
+.nav-bar a:hover, .nav-bar a.active {
+  color: var(--bg); background: var(--fg);
+  text-decoration: none;
+}
+
+/* Hero terminal */
+.terminal-hero {
+  padding: 60px 24px 40px;
+  text-align: center;
+}
+
+.prompt-line {
+  font-size: 13px;
+  color: var(--fg-dim);
+  margin-bottom: 8px;
+}
+.prompt-line .prompt { color: var(--fg); }
+.prompt-line .cmd { color: var(--fg-cyan); }
+
+.hero-title {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 700; margin: 24px 0 16px;
+  color: var(--fg);
+}
+.hero-title .highlight { color: var(--fg-cyan); }
+
+.hero-sub {
+  font-size: 13px; color: var(--fg-dim);
+  max-width: 500px; margin: 0 auto 32px;
+  line-height: 1.8;
+}
+
+.hero-stats {
+  display: flex; justify-content: center; gap: 32px;
+  flex-wrap: wrap; margin-bottom: 32px;
+}
+.stat-item { text-align: center; }
+.stat-item .num { font-size: 20px; font-weight: 700; color: var(--fg); }
+.stat-item .label { font-size: 11px; color: var(--fg-dim); margin-top: 4px; }
+
+.hero-links {
+  display: flex; justify-content: center; gap: 8px;
+  flex-wrap: wrap;
+}
+.hero-links a {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid var(--fg-dim);
+  font-size: 12px; color: var(--fg);
+  transition: all 0.2s;
+}
+.hero-links a:hover {
+  background: var(--fg); color: var(--bg);
+  text-decoration: none;
+}
+
+/* Blinking cursor */
+.cursor {
+  display: inline-block;
+  width: 8px; height: 14px;
+  background: var(--fg);
+  animation: blink 1s step-end infinite;
+  vertical-align: text-bottom;
+  margin-left: 4px;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Section */
+.section {
+  padding: 60px 24px;
+  border-top: 1px solid var(--fg-dim);
+}
+
+.section-header {
+  margin-bottom: 32px;
+}
+.section-header .sig {
+  color: var(--fg-amber);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.section-header h2 {
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+/* About boxes */
+.about-boxes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .about-boxes { grid-template-columns: 1fr; }
+}
+
+.box {
+  border: 1px solid var(--fg-dim);
+  padding: 20px;
+}
+.box .box-title {
+  font-size: 11px; color: var(--fg-amber);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--fg-dim);
+}
+.box p { font-size: 13px; color: var(--fg-dim); line-height: 1.8; }
+.box p .hl { color: var(--fg); }
+
+/* Repo list */
+.repo-list { display: flex; flex-direction: column; gap: 8px; }
+
+.repo-item {
+  border: 1px solid var(--fg-dim);
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.repo-item:hover {
+  background: rgba(51, 255, 0, 0.03);
+  border-color: var(--fg);
+}
+.repo-item .top {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 6px;
+}
+.repo-item .name {
+  font-size: 14px; font-weight: 500; color: var(--fg-cyan);
+}
+.repo-item .lang {
+  font-size: 10px; padding: 2px 8px;
+  border: 1px solid var(--fg-dim); color: var(--fg-dim);
+}
+.repo-item .desc {
+  font-size: 12px; color: var(--fg-dim); line-height: 1.6;
+}
+.repo-item .meta {
+  font-size: 11px; color: var(--fg-dim);
+  margin-top: 8px; display: flex; gap: 16px;
+}
+.repo-item .meta .star { color: var(--fg-amber); }
+
+/* Timeline */
+.timeline-terminal { }
+.tl-item {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--fg-muted);
+  display: flex; gap: 16px;
+}
+.tl-item:last-child { border-bottom: none; }
+.tl-item .year {
+  font-size: 12px; color: var(--fg-amber);
+  font-weight: 700; min-width: 40px;
+}
+.tl-item .content .title { font-size: 13px; color: var(--fg); margin-bottom: 4px; }
+.tl-item .content .desc { font-size: 12px; color: var(--fg-dim); }
+
+/* Post entries */
+.post-list { display: flex; flex-direction: column; gap: 8px; }
+.post-entry {
+  border: 1px solid var(--fg-dim);
+  padding: 16px 20px;
+  transition: all 0.2s;
+}
+.post-entry:hover {
+  background: rgba(51, 255, 0, 0.03);
+  border-color: var(--fg);
+}
+.post-entry .cat {
+  font-size: 10px; color: var(--fg-amber);
+  text-transform: uppercase;
+}
+.post-entry .title { font-size: 13px; color: var(--fg); margin: 4px 0; }
+.post-entry .desc { font-size: 12px; color: var(--fg-dim); }
+.post-entry .date { font-size: 11px; color: var(--fg-dim); margin-top: 6px; }
+
+/* Footer */
+.footer-bar {
+  border-top: 1px solid var(--fg-dim);
+  padding: 32px 24px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--fg-dim);
+}
+.footer-bar .meow { color: var(--fg-amber); }
+
+/* Typewriter animation */
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid var(--fg);
+  animation: typing 2s steps(30) forwards, blink-caret 0.75s step-end infinite;
+  width: 0;
+  display: inline-block;
+}
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+@keyframes blink-caret {
+  50% { border-color: transparent; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .typewriter { animation: none; width: auto; border-right: none; }
+  .cursor { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="status-bar">
+  <span>[RINRROY@DEV] ~ $ <span class="right">whoami</span></span>
+  <span>CONNECTION: SECURE | UPTIME: 2021-10-05</span>
+</div>
+
+<div class="ascii-header">
+  ██████╗ ██╗███╗   ██╗██████╗ ██████╗  ██████╗ ██╗   ██╗
+  ██╔══██╗██║████╗  ██║██╔══██╗██╔══██╗██╔═══██╗╚██╗ ██╔╝
+  ██████╔╝██║██╔██╗ ██║██████╔╝██████╔╝██║   ██║ ╚████╔╝
+  ██╔══██╗██║██║╚██╗██║██╔══██╗██╔══██╗██║   ██║  ╚██╔╝
+  ██║  ██║██║██║ ╚████║██║  ██║██║  ██║╚██████╔╝   ██║
+  ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝    ╚═╝
+    ███████╗ ██████╗ ██╗   ██╗███╗   ██╗██████╗
+    ╚══███╔╝██╔═══██╗██║   ██║████╗  ██║██╔══██╗
+      ███╔╝ ██║   ██║██║   ██║██╔██╗ ██║██████╔╝
+     ███╔╝  ██║   ██║██║   ██║██║╚██╗██║██╔══██╗
+    ███████╗╚██████╔╝╚██████╔╝██║ ╚████║██║  ██║
+    ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝
+</div>
+
+<div class="nav-bar">
+  <a href="#about">[ About ]</a>
+  <a href="#projects">[ Projects ]</a>
+  <a href="#timeline">[ History ]</a>
+  <a href="#posts">[ Posts ]</a>
+  <a href="#contact">[ Contact ]</a>
+</div>
+
+<section class="terminal-hero">
+  <div class="prompt-line">
+    <span class="prompt">root@rinrroy:~$</span>
+    <span class="cmd"> cat /etc/profile</span>
+  </div>
+
+  <h1 class="hero-title">
+    &gt; <span class="highlight">澪洛依</span> / Rinrroy
+    <span class="cursor"></span>
+  </h1>
+
+  <div class="hero-sub">
+    <span class="typewriter">Android Kernel Developer · Open Source Enthusiast · 喵！</span>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="num">16</div>
+      <div class="label">FOLLOWERS</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">6</div>
+      <div class="label">REPOS</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">4</div>
+      <div class="label">PROJECTS</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">2021</div>
+      <div class="label">SINCE</div>
+    </div>
+  </div>
+
+  <div class="hero-links">
+    <a href="https://github.com/Rinrroy" target="_blank">
+      &lt; GitHub /&gt;
+    </a>
+    <a href="https://space.bilibili.com/470832402" target="_blank">
+      &lt; Bilibili /&gt;
+    </a>
+    <a href="https://www.coolapk.com/u/9960587" target="_blank">
+      &lt; Coolapk /&gt;
+    </a>
+    <a href="https://rinrroy.github.io" target="_blank">
+      &lt; Pages /&gt;
+    </a>
+  </div>
+</section>
+
+<section class="section" id="about">
+  <div class="container">
+    <div class="section-header">
+      <div class="sig"># 01</div>
+      <h2>About / 关于</h2>
+    </div>
+    <div class="about-boxes">
+      <div class="box">
+        <div class="box-title">[ PROFILE ]</div>
+        <p>
+          &gt; <span class="hl">Name</span>: 澪洛依 | Rinrroy<br>
+          &gt; <span class="hl">Location</span>: 山东 · 德州<br>
+          &gt; <span class="hl">Role</span>: Android Kernel Developer<br>
+          &gt; <span class="hl">Status</span>: <span style="color:var(--fg)">⚡ ONLINE</span>
+        </p>
+      </div>
+      <div class="box">
+        <div class="box-title">[ BIO ]</div>
+        <p>
+          一个热爱开源的 Android 内核开发者，专注于 OnePlus SM8250 平台内核编译与 KernelSU 集成。<br><br>
+          在 Bilibili 分享数码体验与开发教程，在酷安与同好交流。<br>
+          <span style="color:var(--fg-amber)">喵！</span>
+        </p>
+      </div>
+      <div class="box">
+        <div class="box-title">[ SKILLS ]</div>
+        <p>
+          &gt; Linux Kernel / C<br>
+          &gt; KernelSU / SUSFS<br>
+          &gt; GitHub Actions / CI<br>
+          &gt; Android ROM / Magisk<br>
+          &gt; Shell Scripting
+        </p>
+      </div>
+      <div class="box">
+        <div class="box-title">[ INTERESTS ]</div>
+        <p>
+          &gt; Android 底层开发<br>
+          &gt; 开源社区贡献<br>
+          &gt; 内容创作 & 分享<br>
+          &gt; 数码产品体验<br>
+          &gt; 猫 🐱
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="projects">
+  <div class="container">
+    <div class="section-header">
+      <div class="sig"># 02</div>
+      <h2>Projects / 项目</h2>
+    </div>
+    <div class="repo-list">
+      <div class="repo-item" onclick="window.open('https://github.com/Rinrroy/kernel_oneplus_sm8250')">
+        <div class="top">
+          <span class="name">kernel_oneplus_sm8250</span>
+          <span class="lang">C</span>
+        </div>
+        <div class="desc">Just another CLO based kernel for OnePlus SM8250 devices. 深度优化内核，支持 KernelSU 集成。</div>
+        <div class="meta">
+          <span class="star">★ 核心项目</span>
+          <span>📅 2023</span>
+          <span>🔧 维护中</span>
+        </div>
+      </div>
+      <div class="repo-item" onclick="window.open('https://github.com/Rinrroy/KernelSU_Action')">
+        <div class="top">
+          <span class="name">KernelSU_Action</span>
+          <span class="lang">Shell</span>
+        </div>
+        <div class="desc">A action for build KernelSU into your kernel. 使用 GitHub Action 自动编译集成 KernelSU 的内核。</div>
+        <div class="meta">
+          <span>🤖 自动化构建</span>
+          <span>📅 2024</span>
+        </div>
+      </div>
+      <div class="repo-item" onclick="window.open('https://github.com/Rinrroy/Action_OnePlus_MKSU_SUSFS')">
+        <div class="top">
+          <span class="name">Action_OnePlus_MKSU_SUSFS</span>
+          <span class="lang">Action</span>
+        </div>
+        <div class="desc">使用 Github Action 自动编译一加 SukiSU 内核。一键自动化安全内核编译。</div>
+        <div class="meta">
+          <span>⚡ 一键编译</span>
+          <span>📅 2025</span>
+        </div>
+      </div>
+      <div class="repo-item" onclick="window.open('https://github.com/Rinrroy/xiaomi_pad_system_patch_additional_module')">
+        <div class="top">
+          <span class="name">xiaomi_pad_system_patch</span>
+          <span class="lang">Module</span>
+        </div>
+        <div class="desc">小米平板系统优化 Magisk 模块，提升平板使用体验与功能增强。</div>
+        <div class="meta">
+          <span>📱 平板优化</span>
+          <span>📅 2026</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="timeline">
+  <div class="container">
+    <div class="section-header">
+      <div class="sig"># 03</div>
+      <h2>History / 历程</h2>
+    </div>
+    <div class="timeline-terminal">
+      <div class="tl-item">
+        <span class="year">2021</span>
+        <div class="content">
+          <div class="title">🚀 GitHub 之旅开启</div>
+          <div class="desc">注册 GitHub 账号，开始接触开源世界，踏上 Android 开发之路。</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="year">2023</span>
+        <div class="content">
+          <div class="title">💻 OnePlus 内核开发</div>
+          <div class="desc">开始维护 kernel_oneplus_sm8250，深入 Linux Kernel 编译与 OnePlus 设备优化。</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="year">2024</span>
+        <div class="content">
+          <div class="title">🔧 KernelSU 自动化</div>
+          <div class="desc">创建 KernelSU_Action，实现 GitHub Action 自动编译集成 KernelSU 内核。</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="year">2025</span>
+        <div class="content">
+          <div class="title">⚡ 一加 SukiSU 集成</div>
+          <div class="desc">创建 Action_OnePlus_MKSU_SUSFS，优化一加设备安全内核编译流程。</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="year">2026</span>
+        <div class="content">
+          <div class="title">🌐 个人网站 & 小米平板</div>
+          <div class="desc">创建 GitHub Pages 个人网站，同时扩展至小米平板系统优化模块开发。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="posts">
+  <div class="container">
+    <div class="section-header">
+      <div class="sig"># 04</div>
+      <h2>Posts / 文章</h2>
+    </div>
+    <div class="post-list">
+      <div class="post-entry">
+        <div class="cat">[ TUTORIAL ]</div>
+        <div class="title">&gt; OnePlus SM8250 内核编译指南</div>
+        <div class="desc">详细记录 OnePlus 8/9 系列内核编译完整流程：环境搭建→内核配置→KernelSU 集成→刷机测试。</div>
+        <div class="date">📅 2024 · 预计阅读 15 min</div>
+      </div>
+      <div class="post-entry">
+        <div class="cat">[ TOOL ]</div>
+        <div class="title">&gt; GitHub Action 自动编译内核</div>
+        <div class="desc">手把手教你用 GitHub Action 实现内核自动化编译，集成 KernelSU + SUSFS，解放双手。</div>
+        <div class="date">📅 2025 · 预计阅读 10 min</div>
+      </div>
+      <div class="post-entry">
+        <div class="cat">[ TUTORIAL ]</div>
+        <div class="title">&gt; Magisk 模块制作入门</div>
+        <div class="desc">从零开始制作 Magisk 模块：理解模块结构、编写脚本、修改系统分区、常见问题排查。</div>
+        <div class="date">📅 2025 · 预计阅读 20 min</div>
+      </div>
+      <div class="post-entry">
+        <div class="cat">[ DIGITAL ]</div>
+        <div class="title">&gt; 我的 Android 折腾装备</div>
+        <div class="desc">分享日常开发设备、刷机必备工具、推荐给 Android 入门玩家的实用软件与社区资源。</div>
+        <div class="date">📅 2026 · 预计阅读 8 min</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="contact">
+  <div class="container">
+    <div class="section-header">
+      <div class="sig"># 05</div>
+      <h2>Contact / 联系</h2>
+    </div>
+    <p style="color:var(--fg-dim);font-size:13px;margin-bottom:24px;">
+      &gt; 欢迎通过以下渠道与我联系，一起探讨 Android 开发与开源技术！
+    </p>
+    <div class="hero-links" style="justify-content:flex-start;">
+      <a href="https://github.com/Rinrroy" target="_blank">
+        &lt; GitHub /&gt;
+      </a>
+      <a href="https://space.bilibili.com/470832402" target="_blank">
+        &lt; Bilibili /&gt;
+      </a>
+      <a href="https://www.coolapk.com/u/9960587" target="_blank">
+        &lt; Coolapk /&gt;
+      </a>
+      <a href="https://rinrroy.github.io" target="_blank">
+        &lt; Pages /&gt;
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="footer-bar">
+  <div class="container">
+    <p>╭──────────────────────────────────────╮</p>
+    <p>│ © 2021-2026 Rinrroy · Built with ❤️  │</p>
+    <p>│ <span class="meow">🐱 喵！</span>                          │</p>
+    <p>╰──────────────────────────────────────╯</p>
+  </div>
+</div>
+
+<script>
+// Smooth scroll for nav
+document.querySelectorAll('.nav-bar a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+// Intersection Observer for terminal-style reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.box, .repo-item, .tl-item, .post-entry').forEach((el, i) => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(10px)';
+  el.style.transition = `all 0.4s ease ${i * 0.05}s`;
+  observer.observe(el);
+});
+
+// Live clock in status bar
+function updateClock() {
+  const now = new Date();
+  const time = now.toLocaleTimeString('zh-CN', { hour12: false });
+  const clock = document.querySelector('.status-bar .right');
+  if (clock) clock.textContent = time;
+}
+updateClock();
+setInterval(updateClock, 1000);
+</script>
+</body>
+</html>", "filePath": "C:\\Users\\LingLuoYi\\Documents\\workflows\\web\\design-02-terminal.html"}

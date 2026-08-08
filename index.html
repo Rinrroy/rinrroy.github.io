@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>澪洛依 | 博客设计选集</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0a0a0a;
+  color: #f0f0f0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+}
+h1 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #60A5FA, #A78BFA, #F472B6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.subtitle {
+  color: #888;
+  font-size: 1rem;
+  margin-bottom: 48px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  max-width: 1000px;
+  width: 100%;
+}
+.card {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.card:hover {
+  transform: translateY(-8px);
+  border-color: #444;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.card .preview {
+  width: 100%;
+  height: 180px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+}
+.card:nth-child(1) .preview {
+  background: linear-gradient(135deg, #18181B, #2563EB);
+}
+.card:nth-child(2) .preview {
+  background: #050505;
+  border: 1px solid #33FF00;
+  font-family: 'Courier New', monospace;
+  font-size: 24px;
+  color: #33FF00;
+}
+.card:nth-child(3) .preview {
+  background: linear-gradient(135deg, #EC4899, #EA580C);
+  font-size: 52px;
+}
+.card h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.card p {
+  color: #888;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.card .tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: #2a2a2a;
+  font-size: 11px;
+  color: #aaa;
+  font-weight: 500;
+}
+.card:hover .tag {
+  background: #333;
+}
+footer {
+  margin-top: 48px;
+  color: #555;
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+<h1>澪洛依 ✦ 个人博客</h1>
+<p class="subtitle">基于 ui-ux-pro-max 设计系统 · 三种风格供你筛选</p>
+
+<div class="grid">
+  <a class="card" href="design-01-motion.html" target="_blank">
+    <div class="preview">🌐</div>
+    <h2>设计一 · 现代简约</h2>
+    <p>Motion-Driven 风格 · 蓝白配色 · Archivo + Space Grotesk 字体组合 · 滚动动画 · 支持亮/暗模式切换</p>
+    <span class="tag">专业 · 干净 · 动效丰富</span>
+  </a>
+
+  <a class="card" href="design-02-terminal.html" target="_blank">
+    <div class="preview">&gt; TERMINAL_</div>
+    <h2>设计二 · 终端暗黑</h2>
+    <p>Terminal CLI 风格 · OLED 黑底 + Matrix 绿 · JetBrains Mono 等宽字体 · ASCII 艺术 · 开发者专属</p>
+    <span class="tag">硬核 · 极客 · 高对比</span>
+  </a>
+
+  <a class="card" href="design-03-vibrant.html" target="_blank">
+    <div class="preview">✨</div>
+    <h2>设计三 · 粉彩活力</h2>
+    <p>Creator Economy 风格 · 渐变粉橙配色 · Quicksand + Noto Sans SC · 柔和圆角 · 创意内容创作者</p>
+    <span class="tag">活力 · 可爱 · 社交感</span>
+  </a>
+</div>
+
+<footer>
+  <p>打开任意一个设计预览，用浏览器查看完整效果</p>
+</footer>
+</body>
+</html>
